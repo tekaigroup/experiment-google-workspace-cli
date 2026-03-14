@@ -11,6 +11,10 @@ import {
 } from '../lib/output.js';
 import type { GlobalOptions } from '../types/index.js';
 
+function getCalendarGlobalOptions(command: Command): GlobalOptions {
+  return command.parent?.optsWithGlobals() as GlobalOptions;
+}
+
 /**
  * Register all calendar subcommands
  */
@@ -23,14 +27,15 @@ export function registerCalendarCommands(program: Command): void {
   calendar
     .command('list')
     .description('List all calendars')
-    .action(async (options: GlobalOptions) => {
+    .action(async (_options: GlobalOptions, command: Command) => {
       try {
-        const profileName = getActiveProfile(options.profile);
+        const globalOptions = getCalendarGlobalOptions(command);
+        const profileName = getActiveProfile(globalOptions.profile);
         const auth = await getAuthenticatedClient(profileName);
         const client = new CalendarClient(auth);
 
         const calendars = await client.listCalendars();
-        const format = options.format || 'table';
+        const format = globalOptions.format || 'table';
         const output = formatCalendarList(calendars, format);
         print(output);
       } catch (error) {
@@ -50,9 +55,13 @@ export function registerCalendarCommands(program: Command): void {
     .option('--calendar <id>', 'Calendar ID to query', 'primary')
     .option('--limit <number>', 'Maximum number of events to return', '10')
     .action(
-      async (options: GlobalOptions & { days: string; calendar: string; limit: string }) => {
+      async (
+        options: GlobalOptions & { days: string; calendar: string; limit: string },
+        command: Command
+      ) => {
         try {
-          const profileName = getActiveProfile(options.profile);
+          const globalOptions = getCalendarGlobalOptions(command);
+          const profileName = getActiveProfile(globalOptions.profile);
           const auth = await getAuthenticatedClient(profileName);
           const client = new CalendarClient(auth);
 
@@ -62,7 +71,7 @@ export function registerCalendarCommands(program: Command): void {
             maxResults: parseInt(options.limit, 10),
           });
 
-          const format = options.format || 'table';
+          const format = globalOptions.format || 'table';
           const output = formatEventList(events, format);
           print(output);
         } catch (error) {
@@ -84,10 +93,12 @@ export function registerCalendarCommands(program: Command): void {
     .action(
       async (
         query: string,
-        options: GlobalOptions & { days: string; calendar: string }
+        options: GlobalOptions & { days: string; calendar: string },
+        command: Command
       ) => {
         try {
-          const profileName = getActiveProfile(options.profile);
+          const globalOptions = getCalendarGlobalOptions(command);
+          const profileName = getActiveProfile(globalOptions.profile);
           const auth = await getAuthenticatedClient(profileName);
           const client = new CalendarClient(auth);
 
@@ -96,7 +107,7 @@ export function registerCalendarCommands(program: Command): void {
             days: parseInt(options.days, 10),
           });
 
-          const format = options.format || 'table';
+          const format = globalOptions.format || 'table';
           const output = formatEventList(events, format);
           print(output);
         } catch (error) {
@@ -129,10 +140,12 @@ export function registerCalendarCommands(program: Command): void {
           description?: string;
           location?: string;
           attendees?: string;
-        }
+        },
+        command: Command
       ) => {
         try {
-          const profileName = getActiveProfile(options.profile);
+          const globalOptions = getCalendarGlobalOptions(command);
+          const profileName = getActiveProfile(globalOptions.profile);
           const auth = await getAuthenticatedClient(profileName);
           const client = new CalendarClient(auth);
 
@@ -181,10 +194,12 @@ export function registerCalendarCommands(program: Command): void {
           description?: string;
           location?: string;
           calendar: string;
-        }
+        },
+        command: Command
       ) => {
         try {
-          const profileName = getActiveProfile(options.profile);
+          const globalOptions = getCalendarGlobalOptions(command);
+          const profileName = getActiveProfile(globalOptions.profile);
           const auth = await getAuthenticatedClient(profileName);
           const client = new CalendarClient(auth);
 
@@ -216,10 +231,12 @@ export function registerCalendarCommands(program: Command): void {
     .action(
       async (
         eventId: string,
-        options: GlobalOptions & { calendar: string }
+        options: GlobalOptions & { calendar: string },
+        command: Command
       ) => {
         try {
-          const profileName = getActiveProfile(options.profile);
+          const globalOptions = getCalendarGlobalOptions(command);
+          const profileName = getActiveProfile(globalOptions.profile);
           const auth = await getAuthenticatedClient(profileName);
           const client = new CalendarClient(auth);
 
