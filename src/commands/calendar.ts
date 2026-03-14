@@ -12,7 +12,7 @@ import {
 import type { GlobalOptions } from '../types/index.js';
 
 function getCalendarGlobalOptions(command: Command): GlobalOptions {
-  return command.parent?.optsWithGlobals() as GlobalOptions;
+  return command.optsWithGlobals() as GlobalOptions;
 }
 
 /**
