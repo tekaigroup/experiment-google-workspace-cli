@@ -1,7 +1,7 @@
 import { homedir } from 'os';
 import { join } from 'path';
 import { existsSync, mkdirSync, readFileSync, writeFileSync, readdirSync, rmSync } from 'fs';
-import type { GwcliConfig, ProfileConfig, ProfileCredentials, OAuthCredentials, TokenData } from '../types/index.js';
+import type { GwcliConfig, ProfileConfig, ProfileCredentials, OAuthCredentials } from '../types/index.js';
 
 const CONFIG_DIR = join(homedir(), '.config', 'gwcli');
 const PROFILES_DIR = join(CONFIG_DIR, 'profiles');
