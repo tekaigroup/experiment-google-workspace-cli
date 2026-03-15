@@ -18,12 +18,6 @@ interface DriveDownloadOptions extends GlobalOptions {
   output?: string;
 }
 
-interface DriveExportOptions {
-  profile?: string;
-  exportFormat: string;
-  output?: string;
-}
-
 /**
  * Register all Drive subcommands
  */

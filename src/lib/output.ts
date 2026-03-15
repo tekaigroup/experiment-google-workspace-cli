@@ -20,7 +20,7 @@ export interface FormatOptions {
 export function formatOutput(
   data: any,
   format: OutputFormat,
-  options?: FormatOptions
+  _options?: FormatOptions
 ): string {
   switch (format) {
     case 'json':
@@ -345,7 +345,7 @@ export function printSuccess(message: string): void {
 /**
  * Helper: Format date string
  */
-function formatDate(dateString: string): string {
+export function formatDate(dateString: string): string {
   const date = new Date(dateString);
   if (isNaN(date.getTime())) {
     return dateString;
@@ -382,7 +382,7 @@ function formatDate(dateString: string): string {
 /**
  * Helper: Format file size
  */
-function formatSize(bytes: number): string {
+export function formatSize(bytes: number): string {
   if (bytes === 0) return '0 B';
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -393,7 +393,7 @@ function formatSize(bytes: number): string {
 /**
  * Helper: Get human-readable label for MIME type
  */
-function getMimeTypeLabel(mimeType: string): string {
+export function getMimeTypeLabel(mimeType: string): string {
   const typeMap: Record<string, string> = {
     'application/vnd.google-apps.folder': 'Folder',
     'application/vnd.google-apps.document': 'Google Doc',
