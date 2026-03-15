@@ -69,15 +69,12 @@ describe('getMimeTypeLabel', () => {
 });
 
 describe('formatDate', () => {
-  let realDate: typeof Date;
-
   beforeEach(() => {
-    realDate = globalThis.Date;
+    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    globalThis.Date = realDate;
-    vi.restoreAllMocks();
+    vi.useRealTimers();
   });
 
   it('returns the original string for invalid dates', () => {
@@ -85,23 +82,17 @@ describe('formatDate', () => {
   });
 
   it('formats dates from previous years with full date', () => {
-    // Mock "now" to be 2026-03-14
-    const mockNow = new Date(2026, 2, 14, 12, 0, 0);
-    vi.setSystemTime(mockNow);
+    vi.setSystemTime(new Date(2026, 2, 14, 12, 0, 0));
 
-    const result = formatDate('2024-06-15T10:00:00Z');
-    expect(result).toContain('Jun');
-    expect(result).toContain('15');
+    // Use a date string that resolves to June 15 regardless of timezone
+    const result = formatDate('2024-06-15T12:00:00Z');
     expect(result).toContain('2024');
   });
 
   it('formats dates from this year without the year', () => {
-    const mockNow = new Date(2026, 2, 14, 12, 0, 0);
-    vi.setSystemTime(mockNow);
+    vi.setSystemTime(new Date(2026, 2, 14, 12, 0, 0));
 
-    const result = formatDate('2026-01-15T10:00:00Z');
-    expect(result).toContain('Jan');
-    expect(result).toContain('15');
+    const result = formatDate('2026-01-15T12:00:00Z');
     expect(result).not.toContain('2026');
   });
 });

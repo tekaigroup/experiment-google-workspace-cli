@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { CalendarClient } from './calendar-client.js';
 import type { OAuth2Client } from 'google-auth-library';
 
@@ -16,14 +16,59 @@ vi.mock('googleapis', () => ({
 }));
 
 describe('CalendarClient.parseDateTime', () => {
-  let client: CalendarClient;
+  const client = new CalendarClient(mockAuth);
 
-  afterEach(() => {
-    vi.restoreAllMocks();
+  describe('with fake timers', () => {
+    beforeEach(() => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2025, 5, 15, 8, 0, 0));
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it('parses time with am/pm suffix', () => {
+      const result = client.parseDateTime('2pm');
+      const date = new Date(result);
+      expect(date.getHours()).toBe(14);
+      expect(date.getMinutes()).toBe(0);
+    });
+
+    it('parses time with minutes and am/pm suffix', () => {
+      const result = client.parseDateTime('3:30pm');
+      const date = new Date(result);
+      expect(date.getHours()).toBe(15);
+      expect(date.getMinutes()).toBe(30);
+    });
+
+    it('parses "tomorrow" with time', () => {
+      const result = client.parseDateTime('tomorrow 2pm');
+      const date = new Date(result);
+      expect(date.getDate()).toBe(16);
+      expect(date.getHours()).toBe(14);
+    });
+
+    it('parses "today" with time', () => {
+      const result = client.parseDateTime('today 10:30am');
+      const date = new Date(result);
+      expect(date.getDate()).toBe(15);
+      expect(date.getHours()).toBe(10);
+      expect(date.getMinutes()).toBe(30);
+    });
+
+    it('handles 12am correctly (midnight)', () => {
+      const result = client.parseDateTime('12am');
+      const date = new Date(result);
+      expect(date.getHours()).toBe(0);
+    });
+
+    it('handles 12pm correctly (noon)', () => {
+      const result = client.parseDateTime('12pm');
+      const date = new Date(result);
+      expect(date.getHours()).toBe(12);
+    });
   });
-
-  // Create client before tests
-  client = new CalendarClient(mockAuth);
 
   it('parses ISO 8601 format', () => {
     const result = client.parseDateTime('2025-01-15T10:00:00Z');
@@ -43,80 +88,13 @@ describe('CalendarClient.parseDateTime', () => {
     expect(date.getDate()).toBe(15);
   });
 
-  it('parses time with am/pm suffix', () => {
-    vi.setSystemTime(new Date(2025, 5, 15, 8, 0, 0));
-
-    const result = client.parseDateTime('2pm');
-    const date = new Date(result);
-    expect(date.getHours()).toBe(14);
-    expect(date.getMinutes()).toBe(0);
-
-    vi.useRealTimers();
-  });
-
-  it('parses time with minutes and am/pm suffix', () => {
-    vi.setSystemTime(new Date(2025, 5, 15, 8, 0, 0));
-
-    const result = client.parseDateTime('3:30pm');
-    const date = new Date(result);
-    expect(date.getHours()).toBe(15);
-    expect(date.getMinutes()).toBe(30);
-
-    vi.useRealTimers();
-  });
-
-  it('parses "tomorrow" with time', () => {
-    vi.setSystemTime(new Date(2025, 5, 15, 8, 0, 0));
-
-    const result = client.parseDateTime('tomorrow 2pm');
-    const date = new Date(result);
-    expect(date.getDate()).toBe(16);
-    expect(date.getHours()).toBe(14);
-
-    vi.useRealTimers();
-  });
-
-  it('parses "today" with time', () => {
-    vi.setSystemTime(new Date(2025, 5, 15, 8, 0, 0));
-
-    const result = client.parseDateTime('today 10:30am');
-    const date = new Date(result);
-    expect(date.getDate()).toBe(15);
-    expect(date.getHours()).toBe(10);
-    expect(date.getMinutes()).toBe(30);
-
-    vi.useRealTimers();
-  });
-
-  it('handles 12am correctly (midnight)', () => {
-    vi.setSystemTime(new Date(2025, 5, 15, 8, 0, 0));
-
-    const result = client.parseDateTime('12am');
-    const date = new Date(result);
-    expect(date.getHours()).toBe(0);
-
-    vi.useRealTimers();
-  });
-
-  it('handles 12pm correctly (noon)', () => {
-    vi.setSystemTime(new Date(2025, 5, 15, 8, 0, 0));
-
-    const result = client.parseDateTime('12pm');
-    const date = new Date(result);
-    expect(date.getHours()).toBe(12);
-
-    vi.useRealTimers();
-  });
-
   it('throws on unparseable input', () => {
     expect(() => client.parseDateTime('not-a-date')).toThrow('Unable to parse date/time');
   });
 });
 
 describe('CalendarClient.parseEvent', () => {
-  let client: CalendarClient;
-
-  client = new CalendarClient(mockAuth);
+  const client = new CalendarClient(mockAuth);
 
   it('parses a complete event', () => {
     const rawEvent = {
